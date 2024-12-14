@@ -1,7 +1,70 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData" remoteFilesAllowedToDisappearOnAutoupload="false">
+  <component name="PublishConfigData" autoUpload="Always" serverName="root@gaobh93bswpku6v8snow.deepln.com:47703 password" remoteFilesAllowedToDisappearOnAutoupload="false">
     <serverData>
+      <paths name="root@eucoyajc4giwbzmosnow.deepln.com:42520 password">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="root@fjyuhea8wnx3oguvsnow.deepln.com:40430 password">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="root@fjyuhea8wnx3oguvsnow.deepln.com:40430 password (2)">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="root@fjyuhea8wnx3oguvsnow.deepln.com:40430 password (3)">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="root@fjyuhea8wnx3oguvsnow.deepln.com:40430 password (4)">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="root@fjyuhea8wnx3oguvsnow.deepln.com:40430 password (5)">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="root@fjyuhea8wnx3oguvsnow.deepln.com:40430 password (6)">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="root@gaobh93bswpku6v8snow.deepln.com:47703 password">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/data/coding/sdf" local="$PROJECT_DIR$" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="root@h3ulx0n4w1ciokbesnow.deepln.com:39903 password">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
       <paths name="root@h3ulx0n4w1ciokbesnow.deepln.com:39903 password (2)">
         <serverdata>
           <mappings>
@@ -9,6 +72,14 @@
           </mappings>
         </serverdata>
       </paths>
+      <paths name="root@h3ulx0n4w1ciokbesnow.deepln.com:39903 password (3)">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/data/coding/sdf" local="$PROJECT_DIR$" />
+          </mappings>
+        </serverdata>
+      </paths>
     </serverData>
+    <option name="myAutoUpload" value="ALWAYS" />
   </component>
 </project>

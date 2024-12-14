@@ -1,8 +1,7 @@
 import os
 import tensorflow as tf
 import numpy as np
-from tensorflow.keras.initializers import RandomUniform
-tf.compat.v1.disable_v2_behavior()
+from tensorflow.initializers import random_uniform
 
 class OUActionNoise(object):
     def __init__(self, mu, sigma=0.5, theta=0.5, dt=1e-2, x0=None):
@@ -79,29 +78,28 @@ class Actor(object):
         self.sess = sess
         self.action_bound = action_bound
         self.build_network()
-        self.params = tf.compat.v1.trainable_variables(scope=self.name)
-        self.unnormalized_actor_gradients = tf.compat.v1.gradients(self.mu, self.params, -self.action_gradients)
-        self.actor_gradients = list(map(lambda x: tf.compat.v1.div(x, self.batch_size), self.unnormalized_actor_gradients))
-        self.optimize = tf.compat.v1.train.AdamOptimizer(self.lr).apply_gradients(zip(self.actor_gradients, self.params))
+        self.params = tf.trainable_variables(scope=self.name)
+        self.unnormalized_actor_gradients = tf.gradients(self.mu, self.params, -self.action_gradients)
+        self.actor_gradients = list(map(lambda x: tf.div(x, self.batch_size), self.unnormalized_actor_gradients))
+        self.optimize = tf.train.AdamOptimizer(self.lr).apply_gradients(zip(self.actor_gradients, self.params))
 
     def build_network(self):
-        with tf.compat.v1.variable_scope(self.name):
-            tf.compat.v1.disable_eager_execution()
-            self.input = tf.compat.v1.placeholder(tf.compat.v1.float32, shape=[None, *self.input_dims], name='inputs')
-            self.action_gradients = tf.compat.v1.placeholder(tf.compat.v1.float32, shape=[None, self.n_actions], name='gradients')
+        with tf.variable_scope(self.name):
+            self.input = tf.placeholder(tf.float32, shape=[None, *self.input_dims], name='inputs')
+            self.action_gradients = tf.placeholder(tf.float32, shape=[None, self.n_actions], name='gradients')
             f1 = 1. / np.sqrt(self.fc1_dims)
-            dense1 = tf.compat.v1.layers.dense(self.input, units=self.fc1_dims, kernel_initializer=RandomUniform(-f1, f1), bias_initializer=RandomUniform(-f1, f1))
-            batch1 = tf.compat.v1.layers.batch_normalization(dense1)
-            layer1_activation = tf.compat.v1.nn.tanh(batch1)
+            dense1 = tf.layers.dense(self.input, units=self.fc1_dims, kernel_initializer=random_uniform(-f1, f1), bias_initializer=random_uniform(-f1, f1))
+            batch1 = tf.layers.batch_normalization(dense1)
+            layer1_activation = tf.nn.tanh(batch1)
             f2 = 1. / np.sqrt(self.fc2_dims)
-            dense2 = tf.compat.v1.layers.dense(layer1_activation, units=self.fc2_dims, kernel_initializer=RandomUniform(-f2, f2), bias_initializer=RandomUniform(-f2, f2))
-            batch2 = tf.compat.v1.layers.batch_normalization(dense2)
-            layer2_activation = tf.compat.v1.nn.tanh(batch2)
+            dense2 = tf.layers.dense(layer1_activation, units=self.fc2_dims, kernel_initializer=random_uniform(-f2, f2), bias_initializer=random_uniform(-f2, f2))
+            batch2 = tf.layers.batch_normalization(dense2)
+            layer2_activation = tf.nn.tanh(batch2)
             f3 = 1. / np.sqrt(self.fc2_dims)
-            dense3 = tf.compat.v1.layers.dense(layer2_activation, units=32, kernel_initializer=RandomUniform(-f3, f3), bias_initializer=RandomUniform(-f3, f3))
-            batch3 = tf.compat.v1.layers.batch_normalization(dense3)
-            layer3_activation = tf.compat.v1.nn.tanh(batch3)
-            mu1 = tf.compat.v1.layers.dense(layer3_activation, units=self.n_actions, activation='tanh', kernel_initializer=RandomUniform(-f3, f3), bias_initializer=RandomUniform(-f3, f3))
+            dense3 = tf.layers.dense(layer2_activation, units=32, kernel_initializer=random_uniform(-f3, f3), bias_initializer=random_uniform(-f3, f3))
+            batch3 = tf.layers.batch_normalization(dense3)
+            layer3_activation = tf.nn.tanh(batch3)
+            mu1 = tf.layers.dense(layer3_activation, units=self.n_actions, activation='tanh', kernel_initializer=random_uniform(-f3, f3), bias_initializer=random_uniform(-f3, f3))
             self.mu = mu1
 
     def predict(self, inputs):
@@ -123,42 +121,42 @@ class Critic(object):
         self.batch_size = batch_size
         self.sess = sess
         self.build_network()
-        self.params = tf.compat.v1.trainable_variables(scope=self.name)
-        self.optimize = tf.compat.v1.train.AdamOptimizer(self.lr).minimize(self.loss)
-        self.action_gradients = tf.compat.v1.gradients(self.q, self.actions)
+        self.params = tf.trainable_variables(scope=self.name)
+        self.optimize = tf.train.AdamOptimizer(self.lr).minimize(self.loss)
+        self.action_gradients = tf.gradients(self.q, self.actions)
 
     def build_network(self):
-        with tf.compat.v1.variable_scope(self.name):
-            self.input = tf.compat.v1.placeholder(tf.compat.v1.float32,
+        with tf.variable_scope(self.name):
+            self.input = tf.placeholder(tf.float32,
                                         shape=[None, *self.input_dims],
                                         name='inputs')
-            self.actions = tf.compat.v1.placeholder(tf.compat.v1.float32,
+            self.actions = tf.placeholder(tf.float32,
                                           shape=[None, self.n_actions],
                                           name='actions')
-            self.q_target = tf.compat.v1.placeholder(tf.compat.v1.float32,
+            self.q_target = tf.placeholder(tf.float32,
                                            shape=[None, 1],
                                            name='targets')
             f1 = 1. / np.sqrt(self.fc1_dims)
-            dense1 = tf.compat.v1.layers.dense(self.input, units=self.fc1_dims,
-                                     kernel_initializer=RandomUniform(-f1, f1),
-                                     bias_initializer=RandomUniform(-f1, f1))
-            batch1 = tf.compat.v1.layers.batch_normalization(dense1)
-            layer1_activation = tf.compat.v1.nn.relu(batch1)
+            dense1 = tf.layers.dense(self.input, units=self.fc1_dims,
+                                     kernel_initializer=random_uniform(-f1, f1),
+                                     bias_initializer=random_uniform(-f1, f1))
+            batch1 = tf.layers.batch_normalization(dense1)
+            layer1_activation = tf.nn.relu(batch1)
             f2 = 1. / np.sqrt(self.fc2_dims)
-            dense2 = tf.compat.v1.layers.dense(layer1_activation, units=self.fc2_dims,
-                                     kernel_initializer=RandomUniform(-f2, f2),
-                                     bias_initializer=RandomUniform(-f2, f2))
-            batch2 = tf.compat.v1.layers.batch_normalization(dense2)
-            action_in = tf.compat.v1.layers.dense(self.actions, units=self.fc2_dims,
+            dense2 = tf.layers.dense(layer1_activation, units=self.fc2_dims,
+                                     kernel_initializer=random_uniform(-f2, f2),
+                                     bias_initializer=random_uniform(-f2, f2))
+            batch2 = tf.layers.batch_normalization(dense2)
+            action_in = tf.layers.dense(self.actions, units=self.fc2_dims,
                                         activation='relu')
-            state_actions = tf.compat.v1.add(batch2, action_in)
-            state_actions = tf.compat.v1.nn.relu(state_actions)
+            state_actions = tf.add(batch2, action_in)
+            state_actions = tf.nn.relu(state_actions)
             f3 = 0.003
-            self.q = tf.compat.v1.layers.dense(state_actions, units=1,
-                                     kernel_initializer=RandomUniform(-f3, f3),
-                                     bias_initializer=RandomUniform(-f3, f3),
-                                     kernel_regularizer=tf.compat.v1.keras.regularizers.l2(0.01))
-            self.loss = tf.compat.v1.losses.mean_squared_error(self.q_target, self.q)
+            self.q = tf.layers.dense(state_actions, units=1,
+                                     kernel_initializer=random_uniform(-f3, f3),
+                                     bias_initializer=random_uniform(-f3, f3),
+                                     kernel_regularizer=tf.keras.regularizers.l2(0.01))
+            self.loss = tf.losses.mean_squared_error(self.q_target, self.q)
 
     def predict(self, inputs, actions):
         return self.sess.run(self.q, feed_dict={self.input: inputs, self.actions: actions})
@@ -177,7 +175,7 @@ class Agent(object):
         self.tau = tau
         self.memory = ReplayBuffer(max_size, input_dims, n_actions)
         self.batch_size = batch_size
-        self.sess = tf.compat.v1.Session()
+        self.sess = tf.Session()
 
         self.actor = Actor(alpha, n_actions, name_actor, input_dims, self.sess,
                            layer1_size, layer2_size, 1, batch_size=64, chkpt_dir=chkpt_dir)
@@ -191,16 +189,16 @@ class Agent(object):
         self.noise = OUActionNoise(mu=np.zeros(n_actions))
         self.update_critic = \
             [self.target_critic.params[i].assign(
-                tf.compat.v1.multiply(self.critic.params[i], self.tau) \
-                + tf.compat.v1.multiply(self.target_critic.params[i], 1.0 - self.tau))
+                tf.multiply(self.critic.params[i], self.tau) \
+                + tf.multiply(self.target_critic.params[i], 1.0 - self.tau))
                 for i in range(len(self.target_critic.params))]
         self.update_actor = \
             [self.target_actor.params[i].assign(
-                tf.compat.v1.multiply(self.actor.params[i], self.tau) \
-                + tf.compat.v1.multiply(self.target_actor.params[i], 1.0 - self.tau))
+                tf.multiply(self.actor.params[i], self.tau) \
+                + tf.multiply(self.target_actor.params[i], 1.0 - self.tau))
                 for i in range(len(self.target_actor.params))]
-        #self.SetParamters = [self.actor.params[i].assign(tf.compat.v1.multiply(self.actor_params[i], 1)) for i in range(len(self.actor.params))]
-        self.sess.run(tf.compat.v1.global_variables_initializer())
+        #self.SetParamters = [self.actor.params[i].assign(tf.multiply(self.actor_params[i], 1)) for i in range(len(self.actor.params))]
+        self.sess.run(tf.global_variables_initializer())
         self.update_network_parameters(first=True)
         #self.set_params()
 
@@ -253,7 +251,7 @@ class Agent(object):
     def reset(self,name_actor, name_critic, name_target_actor, name_target_critic, alpha, beta, input_dims, tau, gamma=0.0, n_actions=7, max_size=100000, layer1_size=32, layer2_size=32, batch_size=64, chkpt_dir='tmp/ddpg'):
         self.memory = ReplayBuffer(max_size, input_dims, n_actions)
         self.batch_size = batch_size
-        self.sess = tf.compat.v1.Session()
+        self.sess = tf.Session()
         self.actor = Actor(alpha, n_actions, name_actor, input_dims, self.sess,
                            layer1_size, layer2_size, 1, batch_size=64, chkpt_dir=chkpt_dir)
         self.critic = Critic(beta, n_actions, name_critic, input_dims, self.sess,
@@ -263,19 +261,19 @@ class Agent(object):
         self.target_critic = Critic(beta, n_actions, name_target_critic, input_dims, self.sess,
                                     layer1_size, layer2_size, chkpt_dir=chkpt_dir)
         self.noise = OUActionNoise(mu=np.zeros(n_actions))
-        self.sess.run(tf.compat.v1.global_variables_initializer())
+        self.sess.run(tf.global_variables_initializer())
         self.update_network_parameters(first=True)
 
 
 class Federated_Server(object):
     def __init__(self, numberOfRobotic,name_actor, name_critic, input_dims, n_actions=7, layer1_size=32, layer2_size=32):
-        self.sess = tf.compat.v1.Session()
+        self.sess = tf.Session()
         self.actor = Actor(1, n_actions, name_actor, input_dims, self.sess, layer1_size, layer2_size, 1)
         self.numberOfR=numberOfRobotic
         #初始化这里,注意这里要弄参数是因为每一轮不是都会更新
         self.actors_params= [self.actor.params] *self.numberOfR
         self.robot_sents=np.zeros(self.numberOfR)
-        self.sess.run(tf.compat.v1.global_variables_initializer())
+        self.sess.run(tf.global_variables_initializer())
 
     def federation(self):
         for i in range(len(self.actor.params)):
@@ -289,17 +287,17 @@ class Federated_Server(object):
 
 class Federated_Server_AP(object):
     def __init__(self, name_actor, name_critic, input_dims, n_actions=8, layer1_size=32, layer2_size=32):
-        self.sess = tf.compat.v1.Session()
+        self.sess = tf.Session()
         self.actor = Actor(1, n_actions, name_actor, input_dims, self.sess, layer1_size, layer2_size, 1)
         self.actor_params1 = self.actor.params
         self.actor_params2 = self.actor.params
         self.actor_params3 = self.actor.params
         self.actor_params4 = self.actor.params
-        self.ServerFederation_AP = [self.actor.params[i].assign(tf.compat.v1.multiply(self.actor_params1[i], 1) +
-                                                                tf.compat.v1.multiply(self.actor_params2[i], 1) +
-                                                                tf.compat.v1.multiply(self.actor_params3[i], 1) +
-                                                                tf.compat.v1.multiply(self.actor_params4[i], 1) / 4) for i in range(len(self.actor.params))]
-        self.sess.run(tf.compat.v1.global_variables_initializer())
+        self.ServerFederation_AP = [self.actor.params[i].assign(tf.multiply(self.actor_params1[i], 1) +
+                                                                tf.multiply(self.actor_params2[i], 1) +
+                                                                tf.multiply(self.actor_params3[i], 1) +
+                                                                tf.multiply(self.actor_params4[i], 1) / 4) for i in range(len(self.actor.params))]
+        self.sess.run(tf.global_variables_initializer())
 
     def federation(self):
         self.actor.sess.run(self.ServerFederation_AP)
